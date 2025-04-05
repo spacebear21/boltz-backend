@@ -32,7 +32,7 @@ class ReverseRoutingHints {
     private readonly paymentRequestUtils: PaymentRequestUtils,
   ) {}
 
-  public getHints = (
+  public getHints = async (
     sendingCurrency: Currency,
     args: {
       memo?: string;
@@ -44,7 +44,7 @@ class ReverseRoutingHints {
       userAddressSignature?: Buffer;
       invoice?: { decoded: DecodedInvoice };
     },
-  ): SwapHints => {
+  ): Promise<SwapHints> => {
     const isBolt12 = args.invoice !== undefined;
 
     const invoiceDescriptionHash = !isBolt12
@@ -78,7 +78,7 @@ class ReverseRoutingHints {
       throw Errors.INVALID_ADDRESS();
     }
 
-    const bip21 = this.paymentRequestUtils.encodeBip21(
+    const bip21 = await this.paymentRequestUtils.encodeBip21(
       sendingCurrency.symbol,
       args.userAddress,
       receivedAmount,
