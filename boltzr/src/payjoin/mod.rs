@@ -66,6 +66,7 @@ async fn spawn_payjoin_receiver<'a>(
     let mut payjoin_proposal = match process_v2_proposal(receiver.clone()) {
         Ok(proposal) => proposal,
         Err(payjoin::receive::Error::ReplyToSender(e)) => {
+            dbg!(e);
             todo!("Handle recoverable error")
             // return Err(
             //     handle_recoverable_error(e, receiver, &self.config.v2()?.ohttp_relay).await

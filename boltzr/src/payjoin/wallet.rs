@@ -1,4 +1,3 @@
-
 use std::sync::Arc;
 use std::str::FromStr;
 
@@ -24,8 +23,8 @@ impl BitcoindWallet {
     /// FIXME get client from config argument
     pub fn new() -> Result<Self> {
         let client = Client::new(
-            "127.0.0.1:18443",
-            Auth::CookieFile("../docker/regtest/data/core/cookies/.bitcoin-cookie".into()),
+            "127.0.0.1:18443/wallet/default",
+            Auth::CookieFile("docker/regtest/data/core/cookies/.bitcoin-cookie".into()),
         )?;
         Ok(Self { bitcoind: Arc::new(client) })
     }
