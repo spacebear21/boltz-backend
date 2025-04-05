@@ -6,6 +6,7 @@ use payjoin::{
 };
 use std::sync::Arc;
 use tracing::log::{debug, info, trace};
+use wallet::BitcoindWallet;
 
 use payjoin::bitcoin::consensus::encode::serialize_hex;
 
@@ -171,8 +172,8 @@ fn process_v2_proposal(
         })?
         .commit_outputs();
 
-    let provisional_payjoin =
-        try_contributing_inputs(wants_inputs.clone()).expect("Failed to try contributing inputs");
+    let provisional_payjoin = try_contributing_inputs(wants_inputs.clone(), &wallet)
+        .expect("Failed to try contributing inputs");
 
     let payjoin_proposal = provisional_payjoin.finalize_proposal(
         |psbt| Ok(wallet.process_psbt(psbt)?),
@@ -189,6 +190,18 @@ fn process_v2_proposal(
 
 /// Try to contribute a boltz backend input to the payjoin
 /// TODO depend on wallet as argument
-fn try_contributing_inputs(wants_inputs: WantsInputs) -> Result<ProvisionalProposal> {
-    todo!("try contributing boltz backend input")
+fn try_contributing_inputs(
+    payjoin: WantsInputs,
+    wallet: &BitcoindWallet,
+) -> Result<ProvisionalProposal, ImplementationError> {
+    let candidate_inputs = wallet.list_unspent()?;
+
+    let selected_input = payjoin
+        .try_preserving_privacy(candidate_inputs)
+        .map_err(ImplementationError::from)?;
+
+    Ok(payjoin
+        .contribute_inputs(vec![selected_input])
+        .map_err(ImplementationError::from)?
+        .commit_inputs())
 }
