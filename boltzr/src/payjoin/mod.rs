@@ -1,6 +1,7 @@
 use anyhow::{Result, anyhow};
 use bitcoin::{Address, Amount};
 use payjoin::{
+    OhttpKeys,
     persist::NoopPersister,
     receive::{ImplementationError, ReplyableError, v2::*},
 };
@@ -17,11 +18,14 @@ mod wallet;
 const OHTTP_RELAY: &str = "https://pj.bobspacebkk.com";
 const DIRECTORY: &str = "https://payjo.in";
 
-pub struct PayjoinReceiver {}
+pub struct PayjoinReceiver {
+    ohttp_keys: OhttpKeys,
+}
 
 impl PayjoinReceiver {
-    pub fn new() -> Self {
-        Self {}
+    pub async fn new() -> Result<Self> {
+        let ohttp_keys = payjoin::io::fetch_ohttp_keys(OHTTP_RELAY, DIRECTORY).await?;
+        Ok(Self { ohttp_keys })
     }
 
     /// Initialize a payjoin from a gRPC request
@@ -46,8 +50,7 @@ impl PayjoinReceiver {
         amount: Option<Amount>,
         label: Option<String>,
     ) -> Result<payjoin::PjUri<'a>> {
-        let ohttp_keys = payjoin::io::fetch_ohttp_keys(OHTTP_RELAY, DIRECTORY).await?;
-        let token = NewReceiver::new(address.clone(), DIRECTORY, ohttp_keys, None)
+        let token = NewReceiver::new(address.clone(), DIRECTORY, self.ohttp_keys.clone(), None)
             .expect("Failed to create receiver")
             .persist(&mut payjoin::persist::NoopPersister)
             .expect("Failed to persist receiver");

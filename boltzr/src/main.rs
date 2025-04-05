@@ -266,7 +266,11 @@ async fn main() {
         }
     };
 
-    let payjoin_receiver = Arc::new(PayjoinReceiver::new());
+    let payjoin_receiver = Arc::new(
+        PayjoinReceiver::new()
+            .await
+            .expect("Failed to initialize PayjoinReceiver"),
+    );
 
     let mut grpc_server = grpc::server::Server::new(
         cancellation_token.clone(),
