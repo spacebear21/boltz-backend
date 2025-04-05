@@ -9,7 +9,7 @@ use std::str::FromStr;
 
 mod wallet;
 
-const OHTTP_RELAY: &str = "https://ohttp.payjo.in";
+const OHTTP_RELAY: &str = "https://pj.bobspacebkk.com";
 const DIRECTORY: &str = "https://payjo.in";
 
 struct PayjoinReceiver {}
@@ -17,7 +17,7 @@ struct PayjoinReceiver {}
 /// Initialize a payjoin from a gRPC request
 /// 
 /// Return the Payjoin Uri as a string
-async fn receive_payjoin_adapter<'a>(address: String, sats: Option<u64>, label: Option<String>) -> Result<String> {
+pub async fn receive_payjoin_adapter<'a>(address: String, sats: Option<u64>, label: Option<String>) -> Result<String> {
     let address = Address::from_str(&address)?  
         .assume_checked();
     let amount = sats.map(|s| Amount::from_sat(s));
